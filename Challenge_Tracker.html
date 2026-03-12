@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Challenge Tracker — Prop Firm</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #07101f;
+  --navy2:  #0d1a2e;
+  --navy3:  #132238;
+  --gold:   #c9a84c;
+  --gold-l: #f0d080;
+  --gold-d: #9a7a2e;
+  --silver: #8fa0b8;
+  --cream:  #f4edd8;
+  --green:  #1a9a52;
+  --green-l:#d0f5e4;
+  --red:    #c03030;
+  --red-l:  #fadadA;
+  --orange: #d08020;
+  --orange-l:#fdecd0;
+  --blue:   #2a6dba;
+  --border: rgba(201,168,76,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--navy);color:var(--cream);font-family:'Lato',sans-serif;font-weight:300;min-height:100vh;
+  background-image:radial-gradient(ellipse at 10% 0%,rgba(201,168,76,0.07) 0%,transparent 50%),
+  radial-gradient(ellipse at 90% 100%,rgba(42,109,186,0.07) 0%,transparent 50%);}
+
+/* HEADER */
+.header{background:linear-gradient(180deg,#040c18,var(--navy2));border-bottom:1px solid var(--border);
+  padding:0 28px;height:60px;display:flex;align-items:center;gap:20px;
+  position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,0.6);}
+.logo{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold-l);letter-spacing:2px;white-space:nowrap;}
+.logo small{display:block;font-family:'Lato',sans-serif;font-size:0.65rem;color:var(--silver);letter-spacing:3px;font-weight:300;}
+.header-badge{margin-left:auto;display:flex;gap:10px;align-items:center;}
+.phase-badge{padding:5px 16px;border-radius:20px;font-size:0.72rem;font-weight:700;letter-spacing:1px;font-family:'Cinzel',serif;}
+.phase1{background:rgba(201,168,76,0.15);border:1px solid var(--gold);color:var(--gold-l);}
+.phase2{background:rgba(42,109,186,0.15);border:1px solid var(--blue);color:#80b8ff;}
+.phase-done{background:rgba(26,154,82,0.15);border:1px solid var(--green);color:#80ffb8;}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:28px 20px 80px;}
+
+/* TOP CARDS */
+.top-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px;}
+.kcard{background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:18px 16px;text-align:center;}
+.kcard-label{font-size:0.65rem;color:var(--silver);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+.kcard-val{font-size:1.7rem;font-weight:700;font-family:'Cinzel',serif;}
+.kcard-sub{font-size:0.7rem;color:var(--silver);margin-top:4px;}
+.val-gold{color:var(--gold-l);}
+.val-green{color:#4dffaa;}
+.val-red{color:#ff6060;}
+.val-orange{color:#ffb84d;}
+.val-silver{color:var(--silver);}
+
+/* GAUGE SECTION */
+.gauges{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+@media(max-width:640px){.gauges{grid-template-columns:1fr;}}
+.gauge-card{background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:22px;}
+.gauge-title{font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:1.5px;color:var(--gold);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.gauge-title span{font-family:'Lato',sans-serif;font-size:0.72rem;color:var(--silver);font-weight:300;letter-spacing:0;}
+
+/* Profit gauge */
+.gauge-track{height:22px;background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;position:relative;margin-bottom:8px;}
+.gauge-fill{height:100%;border-radius:12px;transition:width 0.6s cubic-bezier(.4,0,.2,1);position:relative;}
+.gauge-fill-profit{background:linear-gradient(90deg,var(--green),#4dffaa);}
+.gauge-fill-loss{background:linear-gradient(90deg,#4dffaa,var(--orange),var(--red));}
+.gauge-markers{display:flex;justify-content:space-between;font-size:0.65rem;color:var(--silver);margin-top:4px;}
+.gauge-pct{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:0.72rem;font-weight:700;color:white;white-space:nowrap;}
+
+/* Loss gauge segments */
+.loss-track{height:22px;background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;position:relative;margin-bottom:8px;}
+.loss-zone1{position:absolute;left:0;top:0;height:100%;width:50%;background:rgba(208,128,32,0.15);border-right:2px dashed rgba(208,128,32,0.5);}
+.loss-zone2{position:absolute;right:0;top:0;height:100%;width:50%;background:rgba(192,48,48,0.1);}
+.loss-fill{position:absolute;left:0;top:0;height:100%;border-radius:12px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
+
+/* RISK BOX */
+.risk-box{background:var(--navy3);border:2px solid var(--gold);border-radius:14px;padding:20px 24px;margin-bottom:28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.risk-icon{font-size:2rem;}
+.risk-info{flex:1;}
+.risk-title{font-family:'Cinzel',serif;font-size:0.8rem;color:var(--gold);letter-spacing:1px;margin-bottom:4px;}
+.risk-val{font-size:2rem;font-weight:700;font-family:'Cinzel',serif;color:var(--gold-l);}
+.risk-sub{font-size:0.75rem;color:var(--silver);margin-top:2px;}
+.risk-rules{display:flex;flex-direction:column;gap:6px;flex:1;}
+.rule{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;font-size:0.78rem;}
+.rule-active{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);}
+.rule-inactive{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);opacity:0.45;}
+.rule-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.rule-dot-gold{background:var(--gold);}
+.rule-dot-orange{background:var(--orange);}
+
+/* ALERT */
+.alert-box{display:none;background:rgba(192,48,48,0.12);border:1px solid rgba(192,48,48,0.5);border-radius:10px;padding:12px 18px;margin-bottom:20px;font-size:0.85rem;color:#ffaaaa;display:none;align-items:center;gap:10px;}
+.alert-box.show{display:flex;}
+
+/* ADD TRADE */
+.add-card{background:var(--navy2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:28px;}
+.add-title{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--gold);letter-spacing:1px;margin-bottom:16px;}
+.add-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:0.65rem;color:var(--silver);text-transform:uppercase;letter-spacing:1px;}
+.fg input,.fg select,.fg textarea{
+  background:var(--navy3);border:1px solid var(--border);border-radius:8px;
+  color:var(--cream);padding:8px 12px;font-family:'Lato',sans-serif;font-size:0.85rem;transition:border 0.2s;font-weight:300;}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold);}
+.btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.btn-submit{padding:10px 26px;background:var(--gold);color:var(--navy);border:none;border-radius:8px;
+  font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:1px;cursor:pointer;font-weight:700;transition:all 0.2s;}
+.btn-submit:hover{background:var(--gold-l);transform:translateY(-1px);}
+.add-msg{font-size:0.82rem;color:var(--green);}
+
+/* TRADE TABLE */
+.table-card{background:var(--navy2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.table-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.table-title{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--gold);letter-spacing:1px;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+thead tr{background:rgba(0,0,0,0.3);}
+thead th{padding:10px 10px;color:var(--gold);font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;font-weight:700;white-space:nowrap;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.15s;}
+tbody tr:hover{background:rgba(255,255,255,0.03);}
+tbody td{padding:10px 10px;white-space:nowrap;color:var(--cream);}
+
+/* Checkbox custom */
+.check-wrap{display:flex;align-items:center;justify-content:center;}
+.check-box{width:22px;height:22px;border-radius:6px;border:2px solid;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  transition:all 0.2s;flex-shrink:0;user-select:none;}
+.check-win{border-color:var(--green);background:rgba(26,154,82,0.1);}
+.check-win.checked{background:var(--green);color:white;}
+.check-loss{border-color:var(--red);background:rgba(192,48,48,0.1);}
+.check-loss.checked{background:var(--red);color:white;}
+
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;}
+.badge-long{background:var(--green-l);color:var(--green);}
+.badge-short{background:var(--red-l);color:var(--red);}
+.badge-win{background:var(--green-l);color:var(--green);}
+.badge-loss{background:var(--red-l);color:var(--red);}
+.badge-pending{background:var(--orange-l);color:var(--orange);}
+.pos{color:#4dffaa;font-weight:700;}
+.neg{color:#ff6060;font-weight:700;}
+.btn-del{background:none;border:1px solid rgba(192,48,48,0.3);color:var(--red);border-radius:5px;padding:3px 8px;font-size:0.72rem;cursor:pointer;}
+.btn-del:hover{background:rgba(192,48,48,0.1);}
+
+/* PHASE ROADMAP */
+.roadmap{display:flex;gap:0;margin-bottom:28px;border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.road-step{flex:1;padding:18px 20px;background:var(--navy2);position:relative;}
+.road-step:not(:last-child)::after{content:'▶';position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:var(--gold-d);font-size:0.8rem;z-index:1;}
+.road-step.done{background:rgba(26,154,82,0.08);}
+.road-step.active{background:rgba(201,168,76,0.08);border-top:2px solid var(--gold);}
+.road-num{font-family:'Cinzel',serif;font-size:0.65rem;color:var(--silver);letter-spacing:2px;margin-bottom:6px;}
+.road-title{font-size:0.82rem;font-weight:700;color:var(--cream);margin-bottom:4px;}
+.road-target{font-size:0.75rem;color:var(--silver);}
+.road-status{font-size:0.72rem;font-weight:700;margin-top:6px;}
+@media(max-width:600px){.roadmap{flex-direction:column;}.road-step::after{display:none;}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">PROP FIRM TRACKER<small>CHALLENGE DASHBOARD</small></div>
+  <div class="header-badge">
+    <div class="phase-badge phase1" id="headerPhaseBadge">⚡ PHASE 1 EN COURS</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ROADMAP -->
+  <div class="roadmap" id="roadmap">
+    <div class="road-step active" id="road1">
+      <div class="road-num">ÉTAPE 1</div>
+      <div class="road-title">Phase 1 — Challenge</div>
+      <div class="road-target">Objectif : +$400 (8% de $5,000)</div>
+      <div class="road-status" id="road1status" style="color:var(--gold);">En cours...</div>
+    </div>
+    <div class="road-step" id="road2">
+      <div class="road-num">ÉTAPE 2</div>
+      <div class="road-title">Phase 2 — Vérification</div>
+      <div class="road-target">Objectif : +$250 (5% de $5,000)</div>
+      <div class="road-status" id="road2status" style="color:var(--silver);">En attente</div>
+    </div>
+    <div class="road-step" id="road3">
+      <div class="road-num">ÉTAPE 3</div>
+      <div class="road-title">Compte Financé 🏆</div>
+      <div class="road-target">Trader avec capital réel</div>
+      <div class="road-status" id="road3status" style="color:var(--silver);">En attente</div>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="top-grid">
+    <div class="kcard">
+      <div class="kcard-label">Capital de départ</div>
+      <div class="kcard-val val-silver">$5,000</div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">P&L actuel</div>
+      <div class="kcard-val" id="kPnl">$0</div>
+      <div class="kcard-sub" id="kPnlPct">0.00%</div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">Capital actuel</div>
+      <div class="kcard-val val-gold" id="kCapital">$5,000</div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">Perte totale</div>
+      <div class="kcard-val" id="kLoss">$0</div>
+      <div class="kcard-sub" id="kLossLeft">$400 restants</div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">Trades total</div>
+      <div class="kcard-val val-gold" id="kTotal">0</div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">Win Rate</div>
+      <div class="kcard-val" id="kWR">—</div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">Wins</div>
+      <div class="kcard-val val-green" id="kWins">0</div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">Losses</div>
+      <div class="kcard-val val-red" id="kLosses">0</div>
+    </div>
+  </div>
+
+  <!-- ALERT -->
+  <div class="alert-box" id="alertBox">
+    <span>⚠️</span>
+    <span id="alertMsg"></span>
+  </div>
+
+  <!-- GAUGES -->
+  <div class="gauges">
+
+    <!-- PROFIT GAUGE -->
+    <div class="gauge-card">
+      <div class="gauge-title">
+        PROGRESSION PROFIT
+        <span id="gaugePhaseLabel">Phase 1 — Objectif $400</span>
+      </div>
+      <div class="gauge-track">
+        <div class="gauge-fill gauge-fill-profit" id="profitFill" style="width:0%">
+          <span class="gauge-pct" id="profitPct">0%</span>
+        </div>
+      </div>
+      <div class="gauge-markers">
+        <span>$0</span>
+        <span id="gaugeHalf"></span>
+        <span id="gaugeTarget"></span>
+      </div>
+      <div style="margin-top:12px;font-size:0.78rem;color:var(--silver);">
+        Réalisé : <strong id="profitRealized" style="color:var(--gold-l);">$0</strong>
+        &nbsp;·&nbsp; Restant : <strong id="profitLeft" style="color:var(--cream);">$400</strong>
+      </div>
+    </div>
+
+    <!-- LOSS GAUGE -->
+    <div class="gauge-card">
+      <div class="gauge-title">
+        DRAWDOWN — PROTECTION CAPITAL
+        <span id="lossPhaseLabel">Max $400</span>
+      </div>
+      <div class="loss-track">
+        <div class="loss-zone1"></div>
+        <div class="loss-zone2"></div>
+        <div class="loss-fill" id="lossFill" style="width:0%;background:linear-gradient(90deg,var(--orange),var(--red));"></div>
+        <span class="gauge-pct" id="lossPct">0%</span>
+      </div>
+      <div class="gauge-markers">
+        <span style="color:var(--green);">$0</span>
+        <span style="color:var(--orange);">$200 ⚠️</span>
+        <span style="color:var(--red);">$400 ❌</span>
+      </div>
+      <div style="margin-top:12px;font-size:0.78rem;color:var(--silver);">
+        Pertes : <strong id="lossRealized" style="color:#ff6060;">$0</strong>
+        &nbsp;·&nbsp; Marge restante : <strong id="lossLeft" style="color:var(--green);">$400</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RISK BOX -->
+  <div class="risk-box">
+    <div class="risk-icon">🎯</div>
+    <div class="risk-info">
+      <div class="risk-title">RISQUE PAR TRADE — PHASE ACTUELLE</div>
+      <div class="risk-val" id="riskPerTrade">$40</div>
+      <div class="risk-sub" id="riskSub">Phase normale · $400 ÷ 10 · (budget non entamé)</div>
+    </div>
+    <div class="risk-rules">
+      <div class="rule rule-active" id="ruleNormal">
+        <div class="rule-dot rule-dot-gold"></div>
+        <div><strong style="color:var(--gold-l);">Mode Normal</strong> — Pertes &lt; $200 → risque $40/trade ($400 ÷ 10)</div>
+      </div>
+      <div class="rule rule-inactive" id="ruleProtect">
+        <div class="rule-dot rule-dot-orange"></div>
+        <div><strong style="color:var(--orange);">Mode Protégé</strong> — Pertes ≥ $200 → risque $20/trade ($200 ÷ 10)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD TRADE -->
+  <div class="add-card">
+    <div class="add-title">➕ ENREGISTRER UN TRADE</div>
+    <div class="add-grid">
+      <div class="fg"><label>Date</label><input type="date" id="f_date"></div>
+      <div class="fg"><label>Paire</label>
+        <select id="f_pair">
+          <option>AUD/SGD</option><option>AUD/USD</option>
+          <option>NZD/SGD</option><option>NZD/USD</option>
+          <option>EUR/SGD</option><option>EUR/USD</option>
+          <option>GBP/SGD</option><option>GBP/USD</option>
+        </select>
+      </div>
+      <div class="fg"><label>Sens</label>
+        <select id="f_sens"><option>LONG</option><option>SHORT</option></select>
+      </div>
+      <div class="fg"><label>Setup</label>
+        <select id="f_setup">
+          <option>Break & Retest</option><option>Pin Bar HTF</option>
+          <option>OB Haussier</option><option>OB Baissier</option>
+          <option>FVG + Structure</option><option>CHoCH + BOS</option>
+          <option>Rejet HTF</option><option>Liquidité Buy</option>
+          <option>Liquidité Sell</option><option>Ordre Institutionnel</option>
+        </select>
+      </div>
+      <div class="fg"><label>Résultat ($)</label>
+        <input type="number" id="f_result" placeholder="ex: 80 ou -40" step="0.01">
+      </div>
+      <div class="fg"><label>Statut</label>
+        <select id="f_status"><option>WIN</option><option>LOSS</option><option>EN COURS</option></select>
+      </div>
+      <div class="fg"><label>Pips</label>
+        <input type="number" id="f_pips" placeholder="ex: 45">
+      </div>
+      <div class="fg"><label>Note /10</label>
+        <input type="number" id="f_note" min="1" max="10" placeholder="8">
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:14px;">
+      <label>Commentaire</label>
+      <input type="text" id="f_comment" placeholder="Analyse, leçon, contexte...">
+    </div>
+    <div class="btn-row">
+      <button class="btn-submit" onclick="addTrade()">💾 Enregistrer</button>
+      <span class="add-msg" id="addMsg"></span>
+    </div>
+  </div>
+
+  <!-- TRADE TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">📋 JOURNAL DES TRADES</div>
+      <div style="font-size:0.78rem;color:var(--silver);" id="tableStats"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>✓</th><th>Date</th><th>Paire</th><th>Sens</th>
+            <th>Setup</th><th>Résultat</th><th>Pips</th><th>Note</th>
+            <th>Commentaire</th><th>Phase</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──
+const CAPITAL      = 5000;
+const MAX_LOSS     = 400;
+const LOSS_ALERT   = 200;   // seuil bascule mode protégé
+const PHASE1_TARGET = 400;  // +8%
+const PHASE2_TARGET = 250;  // +5%
+const RISK_NORMAL  = 40;    // 400 ÷ 10
+const RISK_PROTECT = 20;    // 200 ÷ 10
+
+let trades = [];
+let nextId = 1;
+
+// ── HELPERS ──
+function totalPnl()  { return trades.filter(t=>t.status!=='EN COURS').reduce((s,t)=>s+t.result,0); }
+function totalLoss() { return Math.abs(trades.filter(t=>t.result<0).reduce((s,t)=>s+t.result,0)); }
+function totalProfit(){ return trades.filter(t=>t.result>0).reduce((s,t)=>s+t.result,0); }
+function wins()  { return trades.filter(t=>t.status==='WIN').length; }
+function losses(){ return trades.filter(t=>t.status==='LOSS').length; }
+function currentPhase() {
+  const pnl = totalPnl();
+  if (pnl >= PHASE1_TARGET + PHASE2_TARGET) return 'funded';
+  if (pnl >= PHASE1_TARGET) return 'phase2';
+  return 'phase1';
+}
+function currentRisk() { return totalLoss() >= LOSS_ALERT ? RISK_PROTECT : RISK_NORMAL; }
+
+// ── RENDER ──
+function render() {
+  const pnl     = totalPnl();
+  const loss    = totalLoss();
+  const profit  = totalProfit();
+  const capital = CAPITAL + pnl;
+  const phase   = currentPhase();
+  const risk    = currentRisk();
+  const w = wins(), l = losses(), tot = trades.length;
+  const wr = (w+l)>0 ? (w/(w+l)*100).toFixed(1)+'%' : '—';
+
+  // KPIs
+  document.getElementById('kPnl').textContent    = (pnl>=0?'+':'')+'$'+Math.abs(pnl).toFixed(0);
+  document.getElementById('kPnl').className      = 'kcard-val '+(pnl>=0?'val-green':'val-red');
+  document.getElementById('kPnlPct').textContent = (pnl>=0?'+':'')+(pnl/CAPITAL*100).toFixed(2)+'%';
+  document.getElementById('kCapital').textContent= '$'+capital.toFixed(0);
+  document.getElementById('kLoss').textContent   = '-$'+loss.toFixed(0);
+  document.getElementById('kLoss').className     = 'kcard-val '+(loss>=LOSS_ALERT?'val-red':'val-orange');
+  document.getElementById('kLossLeft').textContent= '$'+(MAX_LOSS-loss).toFixed(0)+' restants';
+  document.getElementById('kTotal').textContent  = tot;
+  document.getElementById('kWR').textContent     = wr;
+  document.getElementById('kWR').className       = 'kcard-val '+(w>=l&&(w+l)>0?'val-green':'val-red');
+  document.getElementById('kWins').textContent   = w;
+  document.getElementById('kLosses').textContent = l;
+
+  // Profit gauge
+  const phaseTarget = phase==='phase1' ? PHASE1_TARGET : PHASE2_TARGET;
+  const phaseProfit = phase==='phase1' ? Math.min(profit, PHASE1_TARGET)
+                    : Math.min(Math.max(profit-PHASE1_TARGET,0), PHASE2_TARGET);
+  const profitPct   = Math.min(phaseProfit/phaseTarget*100,100);
+  document.getElementById('profitFill').style.width = profitPct+'%';
+  document.getElementById('profitPct').textContent  = profitPct.toFixed(0)+'%';
+  document.getElementById('profitRealized').textContent = '$'+phaseProfit.toFixed(0);
+  document.getElementById('profitLeft').textContent     = '$'+Math.max(phaseTarget-phaseProfit,0).toFixed(0);
+  document.getElementById('gaugePhaseLabel').textContent= phase==='phase1'?'Phase 1 — Objectif $400':'Phase 2 — Objectif $250';
+  document.getElementById('gaugeTarget').textContent    = phase==='phase1'?'$400':'$250';
+  document.getElementById('gaugeHalf').textContent      = phase==='phase1'?'$200':'$125';
+
+  // Loss gauge
+  const lossPct = Math.min(loss/MAX_LOSS*100,100);
+  document.getElementById('lossFill').style.width      = lossPct+'%';
+  document.getElementById('lossPct').textContent       = lossPct.toFixed(0)+'%';
+  document.getElementById('lossRealized').textContent  = '$'+loss.toFixed(0);
+  document.getElementById('lossLeft').textContent      = '$'+Math.max(MAX_LOSS-loss,0).toFixed(0);
+
+  // Risk box
+  document.getElementById('riskPerTrade').textContent = '$'+risk;
+  const isProtect = loss >= LOSS_ALERT;
+  document.getElementById('riskSub').textContent = isProtect
+    ? 'Mode Protégé · $200 ÷ 10 · Pertes ≥ $200'
+    : 'Mode Normal · $400 ÷ 10 · Pertes < $200';
+  document.getElementById('ruleNormal').className  = 'rule '+(isProtect?'rule-inactive':'rule-active');
+  document.getElementById('ruleProtect').className = 'rule '+(isProtect?'rule-active':'rule-inactive');
+
+  // Alert
+  const alertBox = document.getElementById('alertBox');
+  const alertMsg = document.getElementById('alertMsg');
+  if (loss >= MAX_LOSS) {
+    alertBox.classList.add('show');
+    alertMsg.textContent = '🚨 LIMITE DE PERTE ATTEINTE ($400) — Arrêt obligatoire du challenge !';
+    alertBox.style.background='rgba(192,48,48,0.2)';
+  } else if (loss >= LOSS_ALERT) {
+    alertBox.classList.add('show');
+    alertMsg.textContent = `⚠️ Seuil de $200 atteint — Mode Protégé activé. Risque réduit à $20/trade. Il te reste $${(MAX_LOSS-loss).toFixed(0)} de marge.`;
+    alertBox.style.background='rgba(208,128,32,0.12)';
+    alertMsg.style.color='#ffcc80';
+  } else {
+    alertBox.classList.remove('show');
+  }
+
+  // Roadmap
+  const p = phase;
+  ['road1','road2','road3'].forEach(id => {
+    document.getElementById(id).className = 'road-step';
+  });
+  if (p==='phase1') {
+    document.getElementById('road1').classList.add('active');
+    document.getElementById('road1status').textContent = `+$${phaseProfit.toFixed(0)} / $400`;
+    document.getElementById('road1status').style.color = 'var(--gold)';
+  } else if (p==='phase2') {
+    document.getElementById('road1').classList.add('done');
+    document.getElementById('road1status').textContent = '✅ Validée !';
+    document.getElementById('road1status').style.color = 'var(--green)';
+    document.getElementById('road2').classList.add('active');
+    document.getElementById('road2status').textContent = `+$${Math.max(profit-PHASE1_TARGET,0).toFixed(0)} / $250`;
+    document.getElementById('road2status').style.color = 'var(--blue)';
+  } else if (p==='funded') {
+    ['road1','road2','road3'].forEach(id => document.getElementById(id).classList.add('done'));
+    document.getElementById('road1status').textContent='✅ Validée !';document.getElementById('road1status').style.color='var(--green)';
+    document.getElementById('road2status').textContent='✅ Validée !';document.getElementById('road2status').style.color='var(--green)';
+    document.getElementById('road3status').textContent='🏆 FÉLICITATIONS !';document.getElementById('road3status').style.color='var(--gold-l)';
+  }
+
+  // Header badge
+  const badge = document.getElementById('headerPhaseBadge');
+  if (p==='funded') { badge.textContent='🏆 COMPTE FINANCÉ'; badge.className='phase-badge phase-done'; }
+  else if (p==='phase2') { badge.textContent='🔵 PHASE 2'; badge.className='phase-badge phase2'; }
+  else { badge.textContent='⚡ PHASE 1 EN COURS'; badge.className='phase-badge phase1'; }
+
+  // Table
+  renderTable();
+
+  // Table stats
+  document.getElementById('tableStats').textContent =
+    `${tot} trade${tot!==1?'s':''} · ${w}W / ${l}L · P&L : ${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(0)}`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  if (trades.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--silver);font-style:italic;">Aucun trade enregistré — commence à trader !</td></tr>`;
+    return;
+  }
+  const phaseOf = (id) => {
+    // figure out which phase this trade belonged to at the time
+    let runProfit = 0;
+    for (const t of trades) {
+      if (t.result > 0) runProfit += t.result;
+      if (t.id === id) break;
+    }
+    return runProfit <= PHASE1_TARGET ? '1' : '2';
+  };
+  tbody.innerHTML = [...trades].reverse().map(t => {
+    const isWin  = t.status==='WIN';
+    const isLoss = t.status==='LOSS';
+    const isPend = t.status==='EN COURS';
+    return `
+    <tr>
+      <td style="color:var(--silver);font-size:0.75rem;">#${t.id}</td>
+      <td>
+        <div class="check-wrap" style="gap:6px;">
+          <div class="check-box check-win ${isWin?'checked':''}" onclick="toggleStatus(${t.id},'WIN')" title="WIN">✓</div>
+          <div class="check-box check-loss ${isLoss?'checked':''}" onclick="toggleStatus(${t.id},'LOSS')" title="LOSS">✗</div>
+        </div>
+      </td>
+      <td style="color:var(--silver);font-size:0.8rem;">${t.date}</td>
+      <td><strong>${t.pair}</strong></td>
+      <td><span class="badge badge-${t.sens.toLowerCase()}">${t.sens}</span></td>
+      <td style="font-size:0.78rem;">${t.setup}</td>
+      <td class="${t.result>0?'pos':t.result<0?'neg':''}">${t.result>0?'+':''}$${Math.abs(t.result).toFixed(0)}</td>
+      <td class="${t.pips>0?'pos':t.pips<0?'neg':''}" style="font-size:0.8rem;">${t.pips>0?'+':''}${t.pips}</td>
+      <td style="color:var(--gold);font-size:0.8rem;">${t.note}/10</td>
+      <td style="font-size:0.78rem;color:var(--silver);max-width:160px;white-space:normal;">${t.comment||'—'}</td>
+      <td><span class="badge ${t.result>0&&t.result<=PHASE1_TARGET?'badge-win':'badge-pending'}" style="font-size:0.65rem;">P${phaseOf(t.id)}</span></td>
+      <td><button class="btn-del" onclick="deleteTrade(${t.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ACTIONS ──
+function addTrade() {
+  const result = parseFloat(document.getElementById('f_result').value) || 0;
+  const status = document.getElementById('f_status').value;
+  const t = {
+    id:      nextId++,
+    date:    document.getElementById('f_date').value || new Date().toISOString().split('T')[0],
+    pair:    document.getElementById('f_pair').value,
+    sens:    document.getElementById('f_sens').value,
+    setup:   document.getElementById('f_setup').value,
+    result:  result,
+    status:  status,
+    pips:    parseInt(document.getElementById('f_pips').value) || 0,
+    note:    parseInt(document.getElementById('f_note').value) || 5,
+    comment: document.getElementById('f_comment').value,
+  };
+  trades.push(t);
+  // clear form
+  ['f_result','f_pips','f_note','f_comment'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('addMsg').textContent='✅ Trade enregistré !';
+  setTimeout(()=>document.getElementById('addMsg').textContent='',2500);
+  render();
+}
+
+function toggleStatus(id, status) {
+  const t = trades.find(x=>x.id===id);
+  if (!t) return;
+  t.status = t.status===status ? 'EN COURS' : status;
+  // sync result sign
+  if (t.status==='WIN'  && t.result<0) t.result = Math.abs(t.result);
+  if (t.status==='LOSS' && t.result>0) t.result = -Math.abs(t.result);
+  render();
+}
+
+function deleteTrade(id) {
+  trades = trades.filter(t=>t.id!==id);
+  render();
+}
+
+// ── INIT ──
+document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
+render();
+</script>
+</body>
+</html>
